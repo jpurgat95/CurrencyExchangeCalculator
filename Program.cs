@@ -1,6 +1,7 @@
 global using CurrencyExchangeCalculator.Model;
 global using CurrencyExchangeCalculator.Data;
-using Microsoft.EntityFrameworkCore;
+global using Microsoft.EntityFrameworkCore;
+global using Microsoft.AspNetCore.Components;
 
 namespace CurrencyExchangeCalculator
 {
@@ -18,6 +19,11 @@ namespace CurrencyExchangeCalculator
             builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(
                 builder.Configuration.GetConnectionString("DefaultConnection")
                 ));
+            //connection with nbp api
+            builder.Services.AddHttpClient("nbp", a =>
+            {
+                a.BaseAddress = new Uri("https://api.nbp.pl/api/exchangerates/tables/A/?format=json");
+            });
 
             var app = builder.Build();
 

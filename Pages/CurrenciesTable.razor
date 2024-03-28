@@ -1,0 +1,56 @@
+﻿@page "/currenciestable"
+@inject IHttpClientFactory _clientFactory
+@inject ApplicationDbContext _context
+<h3>Rate NBP</h3>
+
+@if (string.IsNullOrWhiteSpace(errorStringRate) == false)
+{
+    <div class="h2">@errorStringRate</div>
+}
+else if (rateEx is null)
+{
+    <div class="h4">Loading...</div>
+}
+else
+{
+    <table class="table table-striped">
+        <thead class="thead dark">
+            <tr>
+                <th>Currency</th>
+                <th>Currency Code</th>
+                <th>Currency Medium Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var x in rateEx.rates)
+            {
+                <tr>
+                    <td>@x.currency</td>
+                    <td>@x.code</td>
+                    <td>@x.mid</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    DayRate rateEx;
+    string errorStringRate;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var clientRate = _clientFactory.CreateClient("nbp");
+
+        try
+        {
+            var rateExList = await clientRate.GetFromJsonAsync<List<DayRate>>("");
+            rateEx = rateExList.First();
+            errorStringRate = null;
+        }
+        catch (Exception exRate)
+        {
+            errorStringRate = $"Error hehe: {exRate.Message}";
+        }
+    }
+}

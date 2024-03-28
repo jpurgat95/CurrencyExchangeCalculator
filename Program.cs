@@ -1,6 +1,6 @@
-using CurrencyExchangeCalculator.Data;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
+global using CurrencyExchangeCalculator.Model;
+global using CurrencyExchangeCalculator.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace CurrencyExchangeCalculator
 {
@@ -13,6 +13,11 @@ namespace CurrencyExchangeCalculator
             // Add services to the container.
             builder.Services.AddRazorPages();
             builder.Services.AddServerSideBlazor();
+            builder.Services.AddHttpClient();
+            //database connection
+            builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(
+                builder.Configuration.GetConnectionString("DefaultConnection")
+                ));
 
             var app = builder.Build();
 

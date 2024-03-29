@@ -1,6 +1,7 @@
 ﻿@page "/currenciestable"
 @inject IHttpClientFactory _clientFactory
 @inject ApplicationDbContext _context
+
 <h3>Rate NBP</h3>
 
 @if (string.IsNullOrWhiteSpace(errorStringRate) == false)
@@ -38,8 +39,47 @@ else
     DayRate rateEx;
     string errorStringRate;
 
+    public async Task SaveDataToDb()
+    {
+        DayRate rateEx;
+        string errorStringRate;
+        var clientRate = _clientFactory.CreateClient("nbp");
+
+        try
+        {
+            var rateExList = await clientRate.GetFromJsonAsync<List<DayRate>>("");
+            rateEx = rateExList.First();
+            foreach (var item in rateEx.rates)
+            {
+                _context.Currencies.Add(new CurrencyExchangeRate()
+                    {
+                        CurrencyName = item.currency,
+                        CurrenyCode = item.code,
+                        Rate = item.mid,
+                        Date = DateTime.Today,
+                    });
+            }
+            _context.SaveChanges();
+
+            errorStringRate = null;
+        }
+        catch (Exception exRate)
+        {
+            errorStringRate = $"Error hehe: {exRate.Message}";
+        }
+    }
+
+    //clear database - commented out until it's needed
+    // public async Task ClearDb()
+    // {
+    //     var allRecords = await _context.Currencies.ToListAsync();
+    //     _context.Currencies.RemoveRange(allRecords);
+    //     await _context.SaveChangesAsync();
+    // }
+
     protected override async Task OnInitializedAsync()
     {
+        //fetching data from nbp api
         var clientRate = _clientFactory.CreateClient("nbp");
 
         try
@@ -51,6 +91,31 @@ else
         catch (Exception exRate)
         {
             errorStringRate = $"Error hehe: {exRate.Message}";
+        }
+        //check if there is any data in database
+        if(!_context.Currencies.Any())
+        {
+            await SaveDataToDb();
+        }
+        else
+        {
+            //date from data base formating to compare
+            var datesFromDatabse = _context.Currencies.Select(c => c.Date).ToList();
+
+            var actualDateFromDatabase = datesFromDatabse.Last();
+            var dayOfYearFromDataBase = actualDateFromDatabase.DayOfYear;
+            var yearFromDataBase = actualDateFromDatabase.Year;
+
+            //actual date formating to compare
+            DateTime currentDate = DateTime.Now;
+            var currentDayOfYear = currentDate.DayOfYear;
+            var currentYear = currentDate.Year;
+
+            //comparing date from db and actual date, if they are different it adds them to db
+            if (dayOfYearFromDataBase != currentDayOfYear && yearFromDataBase != currentYear)
+            {
+                await SaveDataToDb();
+            }
         }
     }
 }

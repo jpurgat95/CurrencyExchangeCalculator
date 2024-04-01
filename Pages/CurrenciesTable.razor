@@ -87,35 +87,40 @@ else
             var rateExList = await clientRate.GetFromJsonAsync<List<DayRate>>("");
             rateEx = rateExList.First();
             errorStringRate = null;
+
+            //check if there is any data in database
+            if (!_context.Currencies.Any())
+            {
+                await SaveDataToDb();
+            }
+            else
+            {
+                //date from data base formating to compare
+                var datesFromDatabse = _context.Currencies.Select(c => c.Date).ToList();
+
+                var actualDateFromDatabase = datesFromDatabse.Last();
+                var dayOfYearFromDataBase = actualDateFromDatabase.DayOfYear;
+                var yearFromDataBase = actualDateFromDatabase.Year;
+
+                //actual date formating to compare
+                DateTime currentDate = DateTime.Now;
+                var currentDayOfYear = currentDate.DayOfYear;
+                var currentYear = currentDate.Year;
+
+                //comparing date from db and actual date, if they are different it adds them to db
+                if (yearFromDataBase != currentYear)
+                {
+                    await SaveDataToDb();
+                }
+                else if (dayOfYearFromDataBase != currentDayOfYear)
+                {
+                    await SaveDataToDb();
+                }
+            }
         }
         catch (Exception exRate)
         {
             errorStringRate = $"Error hehe: {exRate.Message}";
-        }
-        //check if there is any data in database
-        if(!_context.Currencies.Any())
-        {
-            await SaveDataToDb();
-        }
-        else
-        {
-            //date from data base formating to compare
-            var datesFromDatabse = _context.Currencies.Select(c => c.Date).ToList();
-
-            var actualDateFromDatabase = datesFromDatabse.Last();
-            var dayOfYearFromDataBase = actualDateFromDatabase.DayOfYear;
-            var yearFromDataBase = actualDateFromDatabase.Year;
-
-            //actual date formating to compare
-            DateTime currentDate = DateTime.Now;
-            var currentDayOfYear = currentDate.DayOfYear;
-            var currentYear = currentDate.Year;
-
-            //comparing date from db and actual date, if they are different it adds them to db
-            if (dayOfYearFromDataBase != currentDayOfYear && yearFromDataBase != currentYear)
-            {
-                await SaveDataToDb();
-            }
-        }
+        }       
     }
 }

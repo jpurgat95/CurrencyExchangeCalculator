@@ -2,6 +2,7 @@ global using CurrencyExchangeCalculator.Model;
 global using CurrencyExchangeCalculator.Data;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.AspNetCore.Components;
+global using Radzen;
 
 namespace CurrencyExchangeCalculator
 {
@@ -24,6 +25,8 @@ namespace CurrencyExchangeCalculator
             {
                 a.BaseAddress = new Uri("https://api.nbp.pl/api/exchangerates/tables/A/?format=json");
             });
+            //Blazored Radzen components
+            builder.Services.AddRadzenComponents();
 
             var app = builder.Build();
 

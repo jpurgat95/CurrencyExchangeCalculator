@@ -2,7 +2,7 @@
 @inject IHttpClientFactory _clientFactory
 @inject ApplicationDbContext _context
 
-<h3>Rate NBP</h3>
+<h3>Currencies Exchange Rates from NBP</h3>
 
 @if (string.IsNullOrWhiteSpace(errorStringRate) == false)
 {
@@ -19,7 +19,7 @@ else
             <tr>
                 <th>Currency</th>
                 <th>Currency Code</th>
-                <th>Currency Medium Value</th>
+                <th>Currency Exchange Rate  (to PLN)</th>
             </tr>
         </thead>
         <tbody>
@@ -69,13 +69,13 @@ else
         }
     }
 
-    //clear database - commented out until it's needed
-    // public async Task ClearDb()
-    // {
-    //     var allRecords = await _context.Currencies.ToListAsync();
-    //     _context.Currencies.RemoveRange(allRecords);
-    //     await _context.SaveChangesAsync();
-    // }
+    // clear database - commented out until it's needed
+    public async Task ClearDb()
+    {
+        var allRecords = await _context.Currencies.ToListAsync();
+        _context.Currencies.RemoveRange(allRecords);
+        await _context.SaveChangesAsync();
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -87,7 +87,7 @@ else
             var rateExList = await clientRate.GetFromJsonAsync<List<DayRate>>("");
             rateEx = rateExList.First();
             errorStringRate = null;
-
+            await ClearDb();
             //check if there is any data in database
             if (!_context.Currencies.Any())
             {

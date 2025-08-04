@@ -6,5 +6,5 @@ public class CurrencyExchangeRate
     public string CurrencyName {  get; set; }
     public string CurrenyCode {  get; set; }
     public DateTime Date {  get; set; }
-    public float Rate { get; set; }
+    public decimal Rate { get; set; }
 }

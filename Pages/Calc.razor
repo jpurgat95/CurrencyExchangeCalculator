@@ -78,6 +78,6 @@
         var chosenCurrencyValue = rateEx.rates.FirstOrDefault(c => c.currency == value).mid;
         var buyingCurrencyValue = rateEx.rates.FirstOrDefault(c => c.currency == value2).mid;
 
-        result = (chosenCurrencyValue / buyingCurrencyValue) * value3;
+        result = (double)(chosenCurrencyValue / buyingCurrencyValue) * value3;
     }
 }

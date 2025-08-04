@@ -4,9 +4,9 @@
 
 <h3>Currencies Exchange Rates from NBP</h3>
 
-@if (string.IsNullOrWhiteSpace(errorStringRate) == false)
+@if (!string.IsNullOrWhiteSpace(errorStringRate))
 {
-    <div class="h2">@errorStringRate</div>
+    <div class="h2 text-danger">@errorStringRate</div>
 }
 else if (rateEx is null)
 {
@@ -15,11 +15,11 @@ else if (rateEx is null)
 else
 {
     <table class="table table-striped">
-        <thead class="thead dark">
+        <thead class="thead-dark">
             <tr>
                 <th>Currency</th>
                 <th>Currency Code</th>
-                <th>Currency Exchange Rate  (to PLN)</th>
+                <th>Currency Exchange Rate (to PLN)</th>
             </tr>
         </thead>
         <tbody>
@@ -41,35 +41,33 @@ else
 
     public async Task SaveDataToDb()
     {
-        DayRate rateEx;
-        string errorStringRate;
         var clientRate = _clientFactory.CreateClient("nbp");
 
         try
         {
-            var rateExList = await clientRate.GetFromJsonAsync<List<DayRate>>("");
+            var rateExList = await clientRate.GetFromJsonAsync<List<DayRate>>("https://api.nbp.pl/api/exchangerates/tables/A/?format=json");
             rateEx = rateExList.First();
+
             foreach (var item in rateEx.rates)
             {
-                _context.Currencies.Add(new CurrencyExchangeRate()
-                    {
-                        CurrencyName = item.currency,
-                        CurrenyCode = item.code,
-                        Rate = item.mid,
-                        Date = DateTime.Today,
-                    });
+                _context.Currencies.Add(new CurrencyExchangeRate
+                {
+                    CurrencyName = item.currency,
+                    CurrenyCode = item.code,
+                    Rate = item.mid,
+                    Date = rateEx.effectiveDate
+                });
             }
-            _context.SaveChanges();
 
+            await _context.SaveChangesAsync();
             errorStringRate = null;
         }
         catch (Exception exRate)
         {
-            errorStringRate = $"Error hehe: {exRate.Message}";
+            errorStringRate = $"Błąd: {exRate.Message}";
         }
     }
 
-    // clear database - commented out until it's needed
     public async Task ClearDb()
     {
         var allRecords = await _context.Currencies.ToListAsync();
@@ -79,48 +77,42 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        //fetching data from nbp api
         var clientRate = _clientFactory.CreateClient("nbp");
 
         try
         {
-            var rateExList = await clientRate.GetFromJsonAsync<List<DayRate>>("");
+            var rateExList = await clientRate.GetFromJsonAsync<List<DayRate>>("https://api.nbp.pl/api/exchangerates/tables/A/?format=json");
             rateEx = rateExList.First();
             errorStringRate = null;
-            await ClearDb();
-            //check if there is any data in database
-            if (!_context.Currencies.Any())
+
+            var lastRateDate = _context.Currencies.OrderByDescending(c => c.Date).Select(c => c.Date).FirstOrDefault();
+
+            if (lastRateDate.Date != rateEx.effectiveDate.Date)
             {
+                await ClearDb(); // wyczyść stare dane
                 await SaveDataToDb();
-            }
-            else
-            {
-                //date from data base formating to compare
-                var datesFromDatabse = _context.Currencies.Select(c => c.Date).ToList();
-
-                var actualDateFromDatabase = datesFromDatabse.Last();
-                var dayOfYearFromDataBase = actualDateFromDatabase.DayOfYear;
-                var yearFromDataBase = actualDateFromDatabase.Year;
-
-                //actual date formating to compare
-                DateTime currentDate = DateTime.Now;
-                var currentDayOfYear = currentDate.DayOfYear;
-                var currentYear = currentDate.Year;
-
-                //comparing date from db and actual date, if they are different it adds them to db
-                if (yearFromDataBase != currentYear)
-                {
-                    await SaveDataToDb();
-                }
-                else if (dayOfYearFromDataBase != currentDayOfYear)
-                {
-                    await SaveDataToDb();
-                }
             }
         }
         catch (Exception exRate)
         {
-            errorStringRate = $"Error hehe: {exRate.Message}";
-        }       
+            errorStringRate = $"Błąd podczas pobierania danych: {exRate.Message}";
+        }
+    }
+
+    // MODELE
+
+    public class Rate
+    {
+        public string currency { get; set; }
+        public string code { get; set; }
+        public decimal mid { get; set; }
+    }
+
+    public class DayRate
+    {
+        public string table { get; set; }
+        public string no { get; set; }
+        public DateTime effectiveDate { get; set; }
+        public List<Rate> rates { get; set; }
     }
 }

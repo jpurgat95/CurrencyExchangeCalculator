@@ -2,7 +2,7 @@
 @inject IHttpClientFactory _clientFactory
 @inject ApplicationDbContext _context
 
-<h3>Currencies Exchange Rates from NBP</h3>
+<h1 class="header-title">Kursy wymiany walut NBP</h1>
 
 @if (!string.IsNullOrWhiteSpace(errorStringRate))
 {
@@ -10,16 +10,16 @@
 }
 else if (rateEx is null)
 {
-    <div class="h4">Loading...</div>
+    <h1 class="header-title">Ładowanie...</h1>
 }
 else
 {
     <table class="table table-striped">
         <thead class="thead-dark">
             <tr>
-                <th>Currency</th>
-                <th>Currency Code</th>
-                <th>Currency Exchange Rate (to PLN)</th>
+                <th>Waluta</th>
+                <th>Kod Waluty</th>
+                <th>Kurs wymiany walut (na PLN)</th>
             </tr>
         </thead>
         <tbody>

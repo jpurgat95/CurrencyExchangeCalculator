@@ -3,9 +3,12 @@
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
-
+main {
+    background: linear-gradient(135deg, #8fc1a9, #cde6d0);
+}
 h1:focus {
     outline: none;
+    color: #6f42c1;
 }
 
 a, .btn-link {
@@ -66,3 +69,104 @@ a, .btn-link {
     .blazor-error-boundary::after {
         content: "An error has occurred."
     }
+/*Wygl¹d kalkulatora*/
+.currency-converter {
+    max-width: 600px;
+    height: 70vh; /* 70% wysokoœci viewportu */
+    margin: 40px auto;
+    padding: 20px;
+    border: 1px solid #6f42c1;
+    border-radius: 8px;
+    background-color: #e0dff9; /* ciemniejsze tle (jasny fiolet) */
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 20px;
+    box-sizing: border-box;
+}
+
+.icon-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: -10px; /* delikatnie zbli¿a ikonê do przycisku */
+}
+
+.currency-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+    .currency-row > * {
+        flex: 1 1 250px;
+        min-width: 250px;
+        max-width: 100%;
+    }
+
+.amount-label {
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #6f42c1;
+}
+
+.result {
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.6em;
+    color: #6f42c1;
+    margin-top: 20px;
+}
+
+.button-container {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.radzen-button {
+    max-width: 250px;
+    width: 100%;
+    background-color: #6f42c1 !important;
+    color: white !important;
+}
+
+.header-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.header-title {
+    color: #6f42c1;
+    font-weight: 700;
+    letter-spacing: 3px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+}
+/*Wygl¹d tabeli z kursami*/
+.table-striped {
+    color: #6f42c1;
+}
+.table-striped tbody tr:nth-of-type(odd) {
+    --bs-table-accent-bg: #e9ecef;
+    color: #6f42c1;
+}
+/*Wygl¹ ikonki kalkulatora*/
+.icon-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.icon-style {
+    font-size: 300px; /* szeroki i du¿y rozmiar */
+    color: #6f42c1;
+    line-height: 1; /* usuwa dodatkow¹ wysokoœæ */
+}
+

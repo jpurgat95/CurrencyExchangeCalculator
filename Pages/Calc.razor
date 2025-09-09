@@ -1,61 +1,44 @@
-﻿@page "/";
+﻿@page "/"
 @inject IHttpClientFactory _clientFactory
 @inject ApplicationDbContext _context
 
-<div class="container-fluid" style="background-color: #008000; border-radius: 8px; padding-bottom:595px">
-    <div class="d-flex align-items-center justify-content-center mb-3" style="padding-top: 20px">
-        <div>
-            <RadzenLabel Text="You have:" Component="DropDownChangeEvent" Style="width: 100px; text-align: center; margin-right: 8px; margin-bottom: 4px; vertical-align: middle; color: goldenrod; background-color: #444; border-radius: 8px; padding: 4px;" />
-        </div>
-        <div>
-            <RadzenDropDown TValue="string" Value=@value Data=@currenciesNames Change="@(args => value = $"{args}")" Style="max-width: 300px; border-radius: 8px; border-color:darkgoldenrod; padding: 4px; text-align: center; line-height: 22px; height: 32px;" Name="DropDownChangeEvent" />
-        </div>
+<div class="header-container">
+    <h1 class="header-title">
+        KALKULATOR WYMIANY WALUT
+    </h1>
+</div>
+
+<div class="currency-converter">
+    <div class="icon-container">
+        <i class="fas fa-calculator icon-style" aria-hidden="true"></i>
     </div>
 
-    <div class="d-flex align-items-center justify-content-center mb-3" >
-        <div>
-            <RadzenLabel Text="You buy:" Component="DropDownChangeEvent" Style="width: 100px; text-align: center; margin-right: 8px; margin-bottom: 4px; vertical-align: middle; color: goldenrod; background-color: #444; border-radius: 8px; padding: 4px;" />
-        </div>
-        <div>
-            <RadzenDropDown TValue="string" Value=@value2 Data=@currenciesNames Change="@(args => value2 = $"{args}")" Style="max-width: 300px; border-radius: 8px; border-color:darkgoldenrod; padding: 4px; text-align: center; line-height: 22px; height: 32px;" Name="DropDownChangeEvent" />
-        </div>
+
+    <div class="currency-row">
+        <RadzenDropDown @bind-Value="value" Data="@currenciesNames" Placeholder="Wybierz walutę do wymiany" />
+        <RadzenDropDown @bind-Value="value2" Data="@currenciesNames" Placeholder="Wybierz walutę docelową" />
     </div>
 
-    <div class="d-flex align-items-center justify-content-center mb-3">
-        <div>
-            <RadzenLabel Text="Amount:" Component="DropDownChangeEvent" Style="width: 100px; text-align: center; margin-right: 8px; margin-bottom: 4px; vertical-align: middle; color: goldenrod; background-color: #444; border-radius: 8px; padding: 4px;" />
-        </div>
-        <div>
-            <RadzenNumeric TValue="double" Format="0.00" @bind-Value=@value3 Step="0.01" InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "enter value" }})" Style="width:204px; border-radius: 8px; border-color:darkgoldenrod; padding: 4px; text-align: center; line-height: 22px; height: 32px;" Name="DropDownChangeEvent" />
-        </div>
+    <div>
+        <label class="amount-label" for="amountInput">Ilość</label>
+        <RadzenNumeric id="amountInput" @bind-Value="value3" Min="0" Style="width: 100%" Placeholder="Kwota do wymiany" />
     </div>
 
-    <div class="d-flex align-items-center justify-content-center mb-3">
-        <div>
-            <RadzenButton Text="Calculate" Click="@Calculate" Style="width: 312px; margin-right: 8px; margin-left: 8px; margin-bottom: 4px; vertical-align: middle; color: whitesmoke; background-color: darkgoldenrod; border-radius: 8px; padding: 4px;" />
-        </div>
+    <div class="button-container">
+        <RadzenButton class="radzen-button" Text="Oblicz" Click="Calculate" />
     </div>
 
-    <div class="d-flex align-items-center justify-content-center mb-3">
-        <div>
-            <RadzenLabel Text="Result:" Component="DropDownChangeEvent" Style="width: 100px; text-align: center; margin-right: 8px; vertical-align: middle; color: goldenrod; background-color: #444; border-radius: 8px; padding: 4px;" />
-        </div>
-        <div>
-            <RadzenTextBox Value="@FormatNumber(result)" ReadOnly="true" Style="max-width: 300px; border-radius: 8px; border-color:darkgoldenrod; padding: 4px; text-align: center; line-height: 22px; height: 32px;" />
-        </div>
+    <div class="result">
+        Wynik: @FormatNumber(result)
     </div>
 </div>
 
-
-
 @code {
-    string value = "Choose currency";
-    string value2 = "Choose currency";
+    string value = null;
+    string value2 = null;
     double value3 = 1.00;
     double result = 0.00;
     IEnumerable<string> currenciesNames;
-    // IEnumerable<string> currenciesNames2;
-    public List<DayRate> CurrenciesList = new List<DayRate>();
     DayRate rateEx;
 
     protected override async Task OnInitializedAsync()
@@ -64,20 +47,42 @@
         var clientRate = _clientFactory.CreateClient("nbp");
         var rateExList = await clientRate.GetFromJsonAsync<List<DayRate>>("");
         rateEx = rateExList.First();
-
-        currenciesNames = rateEx.rates.Select(c => c.currency).Distinct(); 
-        // currenciesNames2 = rateEx.rates.Select(c => c.currency).Distinct();
+        currenciesNames = rateEx.rates.Select(c => c.currency).Distinct();
     }
 
-    string FormatNumber(double number)
-    {
-        return number.ToString("0.00");
-    }
+    string FormatNumber(double number) => number.ToString("0.00");
+
     void Calculate()
     {
-        var chosenCurrencyValue = rateEx.rates.FirstOrDefault(c => c.currency == value).mid;
-        var buyingCurrencyValue = rateEx.rates.FirstOrDefault(c => c.currency == value2).mid;
+        if (string.IsNullOrEmpty(value) || string.IsNullOrEmpty(value2))
+        {
+            result = 0.00;
+            return;
+        }
 
-        result = (double)(chosenCurrencyValue / buyingCurrencyValue) * value3;
+        var chosenCurrency = rateEx.rates.FirstOrDefault(c => c.currency == value);
+        var buyingCurrency = rateEx.rates.FirstOrDefault(c => c.currency == value2);
+
+        if (chosenCurrency == null || buyingCurrency == null)
+        {
+            result = 0.00;
+            return;
+        }
+
+        result = (chosenCurrency.mid / buyingCurrency.mid) * value3;
+    }
+
+    public class DayRate
+    {
+        public string No { get; set; }
+        public DateTime EffectiveDate { get; set; }
+        public List<Rate> rates { get; set; }
+    }
+
+    public class Rate
+    {
+        public string currency { get; set; }
+        public string code { get; set; }
+        public double mid { get; set; }
     }
 }

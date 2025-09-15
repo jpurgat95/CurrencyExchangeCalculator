@@ -1,7 +1,8 @@
-# CurrencyExchangeCalculator
-## Short description
-`Currency Exchange Calculator` is a web application which connects with National Bank of Poland API to fetch data about currencies exchange rates. 
-It also connects with local sql database to store the data from API. `Currency ExchangeCalculator` consists of two razor components: `Calc.razor` and `CurrenciesTable.razor`.
-`CurrenciesTable.razor` is a razor page which displays `Currencies Exchange Rates from NBP` table which includes information about currencies exchange rates.
-`Calc.razor` is a razor page which converts current currency amount into a currency to buy amount. It is also the home page.
-`Radzen Blazor` NuGet package was used in the project.
+# Kalkulator wymiany walut
+## Krótki opis
+`Kalkulator wymiany walut` to aplikacja webowa, która łączy się z API Narodowego Banku Polskiego, aby pobierać dane o kursach wymiany walut.  
+Łączy się również z lokalną bazą danych SQL, aby przechowywać dane pobrane z API.  
+`Kalkulator wymiany walut` składa się z dwóch komponentów Razor: `Calc.razor` i `CurrenciesTable.razor`.  
+`CurrenciesTable.razor` to strona Razor, która wyświetla tabelę „Kursy walut z NBP” zawierającą informacje o kursach walut.  
+`Calc.razor` to strona Razor, która konwertuje podaną kwotę z aktualnej waluty na walutę docelową. Jest to również strona główna aplikacji.  
+W projekcie wykorzystano pakiet NuGet `Radzen Blazor`.

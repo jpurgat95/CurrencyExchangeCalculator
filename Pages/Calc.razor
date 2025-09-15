@@ -29,7 +29,7 @@
     </div>
 
     <div class="result">
-        Wynik: @FormatNumber(result)
+        Wynik: @FormatNumber(result) @targetCurrencyCode
     </div>
 </div>
 
@@ -40,6 +40,7 @@
     double result = 0.00;
     IEnumerable<string> currenciesNames;
     DayRate rateEx;
+    string targetCurrencyCode = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -57,6 +58,7 @@
         if (string.IsNullOrEmpty(value) || string.IsNullOrEmpty(value2))
         {
             result = 0.00;
+            targetCurrencyCode = "";
             return;
         }
 
@@ -66,10 +68,12 @@
         if (chosenCurrency == null || buyingCurrency == null)
         {
             result = 0.00;
+            targetCurrencyCode = "";
             return;
         }
 
         result = (chosenCurrency.mid / buyingCurrency.mid) * value3;
+        targetCurrencyCode = buyingCurrency.code;
     }
 
     public class DayRate
